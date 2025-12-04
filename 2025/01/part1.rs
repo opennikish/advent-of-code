@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Read};
 
@@ -14,25 +15,18 @@ struct Rotation {
     clicks: i32,
 }
 
-// Circle dial of the safe clicks with a range 0..90, 50 is initial position
-fn main() {
-    let file = match File::open("in.txt") {
-        Ok(f) => f,
-        Err(_) => panic!("Cannot read input"), // todo: find better way how to handle Result err
-    };
-
-    let res = solve(file);
-    match res {
-        Ok(x) => println!("ans: {x}"),
-        Err(e) => eprintln!("Unexpected error: {}", e),
-    }
+// Circle dial of the safe clicks with a range 0..99, 50 is initial position. 
+// Also, 0->99 or 99->0 counts as 1 click.
+fn main() -> Result<(), Box<dyn Error>> {
+    let file = File::open("in.txt")?;
+    let ans = solve(file)?;
+    println!("{ans}");
+    Ok(())
 }
 
-fn solve<R: Read>(reader: R) -> Result<i32, String> {
-    let res = load_rotations(reader);
-
-    res.map(|rotations| do_solve(rotations))
-        .map_err(|e| format!("Unexpected error: {}", e))
+fn solve<R: Read>(reader: R) -> Result<i32, Box<dyn Error>> {    
+    let rotations = load_rotations(reader)?;
+    Ok(do_solve(rotations))    
 }
 
 fn do_solve(rotations: Vec<Rotation>) -> i32 {
@@ -65,7 +59,7 @@ fn load_rotations<R: Read>(reader: R) -> io::Result<Vec<Rotation>> {
         let dir = match buf.chars().next() {
             Some('L') => Direction::Left,
             Some('R') => Direction::Right,
-            _ => unreachable!("Unexpected direction"),
+            _ => unreachable!("got unexpected direction"),
         };
 
         let clicks = buf[1..]
@@ -103,8 +97,7 @@ L82
 ";
 
         let cursor = Cursor::new(input.as_bytes());
-        let res = solve(cursor);
-        assert!(res.is_ok());
+        let res = solve(cursor);        
         assert_eq!(res.unwrap(), 3);
     }
 
@@ -118,8 +111,7 @@ R50
 ";
 
         let cursor = Cursor::new(input.as_bytes());
-        let res = solve(cursor);
-        assert!(res.is_ok());
+        let res = solve(cursor);        
         assert_eq!(res.unwrap(), 2);
     }
 }
