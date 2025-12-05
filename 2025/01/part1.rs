@@ -26,10 +26,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn solve<R: Read>(reader: R) -> Result<i32, Box<dyn Error>> {    
     let rotations = load_rotations(reader)?;
-    Ok(do_solve(rotations))    
-}
-
-fn do_solve(rotations: Vec<Rotation>) -> i32 {
     let mut curr: i32 = 50;
     let mut ans = 0;
     let len = 100;
@@ -46,7 +42,7 @@ fn do_solve(rotations: Vec<Rotation>) -> i32 {
         }
     }
 
-    ans
+    Ok(ans)
 }
 
 fn load_rotations<R: Read>(reader: R) -> io::Result<Vec<Rotation>> {
@@ -68,7 +64,7 @@ fn load_rotations<R: Read>(reader: R) -> io::Result<Vec<Rotation>> {
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
         buf.clear();
-
+        
         rotations.push(Rotation { dir, clicks });
     }
 
